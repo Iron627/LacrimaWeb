@@ -2,6 +2,11 @@ name: Build Lacrima WASM
 
 on:
   workflow_dispatch:
+  push:
+    paths:
+      - ".github/workflows/build-lacrima-wasm.yml"
+      - "scripts/build-lacrima-wasm.mjs"
+      - "tools/lacrima-wasm/**"
   schedule:
     - cron: "0 */12 * * *"
 
