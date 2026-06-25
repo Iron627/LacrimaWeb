@@ -1,0 +1,72 @@
+name: Build Lacrima WASM
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 */12 * * *"
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout GUI
+        uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: stable
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Clone Lacrima
+        run: |
+          git clone --depth=1 https://github.com/iron627/lacrima .cache/lacrima
+          cd .cache/lacrima
+          echo "LACRIMA_SHA=$(git rev-parse HEAD)" >> $GITHUB_ENV
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build Lacrima WASM
+        run: npm run build:engine
+
+      - name: Write build info
+        run: |
+          mkdir -p public/engines/lacrima
+          cat > public/engines/lacrima/build-info.json <<EOF
+          {
+            "engine": "lacrima",
+            "source": "https://github.com/iron627/lacrima",
+            "commit": "${LACRIMA_SHA}",
+            "builtAt": "$(date -u +"%Y-%m-%dT%H:%M:%SZ")",
+            "goVersion": "$(go version)"
+          }
+          EOF
+
+      - name: Test
+        run: npm test
+
+      - name: Build web app
+        run: npm run build:web
+        env:
+          BASE_PATH: /LacrimaWeb/
+
+      - name: Commit updated engine assets
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add public/engines/lacrima
+          if git diff --cached --quiet; then
+            echo "No Lacrima WASM asset changes."
+          else
+            git commit -m "chore: update Lacrima WASM"
+            git push
+          fi
