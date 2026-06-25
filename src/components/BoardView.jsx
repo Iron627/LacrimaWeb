@@ -19,16 +19,16 @@ export function BoardView({
 }) {
   const squareStyles = {}
 
-  mark(squareStyles, lastMove?.from, { background: 'rgba(219, 171, 68, 0.45)' })
-  mark(squareStyles, lastMove?.to, { background: 'rgba(219, 171, 68, 0.45)' })
-  mark(squareStyles, thinkingMove?.from, { boxShadow: 'inset 0 0 0 4px rgba(59, 130, 246, 0.8)' })
-  mark(squareStyles, thinkingMove?.to, { boxShadow: 'inset 0 0 0 4px rgba(59, 130, 246, 0.8)' })
-  mark(squareStyles, checkSquare, { background: 'rgba(220, 38, 38, 0.55)' })
+  mark(squareStyles, lastMove?.from, { background: 'rgba(205, 170, 74, 0.62)' })
+  mark(squareStyles, lastMove?.to, { background: 'rgba(205, 170, 74, 0.62)' })
+  mark(squareStyles, thinkingMove?.from, { boxShadow: 'inset 0 0 0 4px rgba(112, 161, 255, 0.9)' })
+  mark(squareStyles, thinkingMove?.to, { boxShadow: 'inset 0 0 0 4px rgba(112, 161, 255, 0.9)' })
+  mark(squareStyles, checkSquare, { background: 'rgba(199, 77, 62, 0.68)' })
 
   for (const square of legalTargets) {
     mark(squareStyles, square, {
       background:
-        'radial-gradient(circle, rgba(43, 93, 69, 0.55) 0 18%, transparent 20%)',
+        'radial-gradient(circle, rgba(30, 30, 28, 0.38) 0 18%, transparent 20%)',
     })
   }
 
@@ -48,10 +48,10 @@ export function BoardView({
           },
           onSquareClick: ({ square }) => onSquareClick?.(square),
           darkSquareStyle: { backgroundColor: '#769656' },
-          lightSquareStyle: { backgroundColor: '#eeeed2' },
+          lightSquareStyle: { backgroundColor: '#baca44' },
           boardStyle: {
-            borderRadius: 6,
-            boxShadow: '0 20px 50px rgba(18, 24, 38, 0.18)',
+            borderRadius: 3,
+            boxShadow: '0 12px 34px rgba(0, 0, 0, 0.34)',
           },
         }}
       />

@@ -287,9 +287,10 @@ function App() {
       <header className="top-bar">
         <div>
           <h1>LacrimaWeb</h1>
-          <p>Lacrima-only browser chess with clock search, odds, eval, and NPS.</p>
+          <p>{status}</p>
         </div>
         <div className="actions">
+          <span>{gameStarted ? 'Game active' : 'Setup'}</span>
           <button type="button" onClick={startGame} disabled={gameStarted || !setupValidation.valid}>
             Start
           </button>
@@ -323,10 +324,6 @@ function App() {
         </aside>
 
         <section className="board-area">
-          <div className="status-strip">
-            <strong>{status}</strong>
-            <span>{gameStarted ? 'Game active' : 'Configure odds and clocks before start'}</span>
-          </div>
           <div className="board-with-eval">
             <BoardView
               allowDragging={gameStarted && !engineThinking && game.turn() === humanColor}
