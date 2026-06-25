@@ -60,6 +60,7 @@ export class LacrimaAdapter {
 
   postCommand(command, extra = {}) {
     if (!this.worker) throw new Error('Lacrima worker is not loaded.')
+    this.emit('line', `> ${command}`)
     this.worker.postMessage({ type: 'command', command, ...extra })
   }
 

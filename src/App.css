@@ -315,16 +315,6 @@ dd {
   }
 
   .eval-row {
-    flex-direction: row;
-  }
-
-  .eval-bar {
-    width: min(70vw, 320px);
-    height: 26px;
-  }
-
-  .eval-fill {
-    height: 100% !important;
-    width: 50%;
+    align-items: flex-start;
   }
 }

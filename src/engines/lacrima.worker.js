@@ -66,7 +66,12 @@ async function loadLacrima() {
   loading = (async () => {
     self.lacrimaOnLine = handleLine
 
-    await import(/* @vite-ignore */ LACRIMA_ASSETS.wasmExec)
+    const wasmExecResponse = await fetch(LACRIMA_ASSETS.wasmExec)
+    if (!wasmExecResponse.ok) {
+      throw new Error(`Unable to load ${LACRIMA_ASSETS.wasmExec}`)
+    }
+    const wasmExecSource = await wasmExecResponse.text()
+    ;(0, eval)(wasmExecSource)
 
     if (typeof self.Go !== 'function') {
       throw new Error('wasm_exec.js did not expose Go runtime.')
