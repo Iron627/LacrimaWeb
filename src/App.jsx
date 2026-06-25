@@ -530,8 +530,10 @@ function App() {
     ? `${resignedColor === 'w' ? 'White' : 'Black'} resigned`
     : gameStatus(game, flaggedColor)
 
+  const shellState = gameActive ? 'active' : terminalGame ? 'terminal' : 'setup'
+
   return (
-    <main className="app-shell">
+    <main className={`app-shell ${shellState}`}>
       <header className="top-bar">
         <div>
           <h1>LacrimaWeb</h1>
@@ -614,7 +616,7 @@ function App() {
                 </button>
                 {!setupValidation.valid && <p className="warning">{setupValidation.reason}</p>}
               </section>
-              <section className="panel">
+              <section className="panel display-panel">
                 <h2>Display</h2>
                 <label className="inline-toggle eval-toggle">
                   <input checked={showEvalBar} type="checkbox" onChange={(event) => setShowEvalBar(event.target.checked)} />
@@ -637,7 +639,7 @@ function App() {
                   </div>
                 </section>
               )}
-              <section className="panel">
+              <section className="panel display-panel">
                 <h2>Display</h2>
                 <label className="inline-toggle eval-toggle">
                   <input checked={showEvalBar} type="checkbox" onChange={(event) => setShowEvalBar(event.target.checked)} />

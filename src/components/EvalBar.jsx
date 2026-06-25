@@ -13,7 +13,7 @@ export function EvalBar({ show, cpWhite, mateWhite }) {
     <section className="eval-panel">
       <div className="eval-row">
         <div className="eval-bar" aria-label="White evaluation">
-          <div className="eval-fill" style={{ height: `${percent}%` }} />
+          <div className="eval-fill" style={{ height: `${percent}%`, '--eval-width': `${percent}%` }} />
         </div>
         <strong>{formatEval({ cpWhite, mateWhite })}</strong>
       </div>

@@ -534,28 +534,300 @@ dd {
 }
 
 @media (max-width: 700px) {
+  .app-shell {
+    min-height: 100dvh;
+  }
+
   .top-bar {
-    grid-template-columns: 1fr;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    grid-template-columns: minmax(0, 1fr) auto;
+    min-height: 46px;
+    padding: 6px 8px;
+  }
+
+  .top-bar h1 {
+    font-size: 18px;
+  }
+
+  .top-bar p {
+    max-width: 210px;
+    overflow: hidden;
+    font-size: 12px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .actions span {
+    padding: 4px 7px;
+    border: 1px solid #3f3a33;
+    border-radius: 999px;
+    background: #181715;
+    color: #b8b0a4;
+    font-size: 11px;
+    white-space: nowrap;
   }
 
   .layout {
-    padding: 6px;
+    gap: 7px;
+    padding: 7px;
+  }
+
+  .sidebar,
+  .sidebar.right {
+    display: contents;
+  }
+
+  .panel {
+    gap: 7px;
+    padding: 8px;
+    border-radius: 3px;
+    box-sizing: border-box;
+    width: 100%;
+  }
+
+  .clock-panel {
+    order: 1;
+  }
+
+  .setup .launch-panel {
+    order: 2;
+  }
+
+  .setup .board-area {
+    order: 3;
+  }
+
+  .active .board-area,
+  .terminal .board-area {
+    order: 2;
+  }
+
+  .terminal .endgame-panel {
+    order: 3;
+  }
+
+  .active .resign-panel {
+    order: 3;
+  }
+
+  .display-panel {
+    order: 4;
+  }
+
+  .status-panel {
+    order: 5;
+  }
+
+  .move-list {
+    order: 6;
+  }
+
+  .time-panel {
+    order: 7;
+  }
+
+  .color-panel {
+    order: 8;
+  }
+
+  .custom-time-panel {
+    order: 9;
+  }
+
+  .odds-panel {
+    order: 10;
+  }
+
+  .panel h2 {
+    font-size: 12px;
+  }
+
+  .choice-grid,
+  .time-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 5px;
+  }
+
+  .choice-pair {
+    gap: 5px;
+  }
+
+  .choice-card {
+    grid-template-columns: 1fr;
+    justify-items: center;
+    min-height: 42px;
+    padding: 6px 4px;
+    gap: 3px;
+    text-align: center;
+    font-size: 11px;
+  }
+
+  .choice-card svg {
+    width: 15px;
+    height: 15px;
+  }
+
+  .choice-card span {
+    max-width: 100%;
+  }
+
+  .king-card .piece-icon {
+    font-size: 20px;
+  }
+
+  .odds-subgrid {
+    gap: 5px;
+  }
+
+  .choice-pair.compact .choice-card,
+  .odds-subgrid .choice-card {
+    min-height: 34px;
+  }
+
+  .time-grid label {
+    font-size: 11px;
+  }
+
+  .time-grid input {
+    min-height: 28px;
+    padding: 0 5px;
+  }
+
+  .board-area {
+    gap: 6px;
   }
 
   .board-with-eval {
-    grid-template-columns: 1fr;
+    width: 100%;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 5px;
   }
 
   .board-with-eval.no-eval {
-    grid-template-columns: 1fr;
+    width: 100%;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .board-shell {
+    width: min(100%, calc(100vw - 14px));
+    max-width: calc(100dvh - 154px);
   }
 
   .eval-panel {
+    width: min(100%, calc(100vw - 14px));
     height: auto;
     min-height: auto;
   }
 
   .eval-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 48px;
+    align-items: center;
+    gap: 7px;
+  }
+
+  .eval-bar {
+    width: 100%;
+    height: 10px;
+    min-height: 10px;
+  }
+
+  .eval-fill {
+    bottom: auto;
+    left: 0;
+    height: 100% !important;
+    width: var(--eval-width, 50%);
+  }
+
+  .eval-row strong {
+    font-size: 12px;
+    text-align: right;
+  }
+
+  .clock-panel {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    align-items: stretch;
+    padding: 7px;
+  }
+
+  .clock-row {
+    flex-direction: column;
     align-items: flex-start;
+    gap: 3px;
+    padding: 7px 8px;
+  }
+
+  .clock-row span {
+    max-width: 100%;
+    overflow: hidden;
+    font-size: 11px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .clock-row strong {
+    font-size: 22px;
+  }
+
+  .clock-panel .small-note {
+    display: none;
+  }
+
+  .launch-panel {
+    min-height: auto;
+  }
+
+  .setup .launch-panel h2 {
+    display: none;
+  }
+
+  .launch-button {
+    min-height: 44px;
+    font-size: 16px;
+  }
+
+  .fen-panel {
+    width: 100%;
+    grid-template-columns: minmax(0, 1fr) auto;
+    padding: 6px;
+  }
+
+  .fen-panel code {
+    font-size: 10px;
+  }
+
+  .status-panel .small-note,
+  .uci-console {
+    display: none;
+  }
+
+  .perf-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  dl {
+    gap: 5px;
+  }
+
+  dt {
+    font-size: 10px;
+  }
+
+  dd {
+    overflow: hidden;
+    font-size: 12px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .move-list ol {
+    max-height: 128px;
+  }
+
+  .setup-board .board-shell {
+    max-width: min(244px, calc(100vw - 32px));
   }
 }

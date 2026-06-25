@@ -35,7 +35,7 @@ export function TimeControlPicker({
 
   return (
     <>
-    <section className="panel">
+    <section className="panel time-panel">
       <h2>Time</h2>
       <div className="choice-grid time-choices">
         {TIME_CONTROL_PRESETS.map((preset) => {
@@ -56,7 +56,7 @@ export function TimeControlPicker({
       </div>
     </section>
 
-    <section className="panel">
+    <section className="panel color-panel">
       <h2>Play As</h2>
       <div className="choice-pair" aria-label="Human color">
         <button
@@ -81,7 +81,7 @@ export function TimeControlPicker({
     </section>
 
       {isCustom && (
-        <section className="panel">
+        <section className="panel custom-time-panel">
           <h2>Time Odds</h2>
         <div className="time-grid">
           <label>

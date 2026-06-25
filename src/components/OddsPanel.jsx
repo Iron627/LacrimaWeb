@@ -25,7 +25,7 @@ export function OddsPanel({
   }
 
   return (
-    <section className="panel">
+    <section className="panel odds-panel">
       <h2>Material Odds</h2>
       <div className="choice-grid odds-choices">
         {ODDS_TYPES.map(({ id, label, Icon, piece }) => (
