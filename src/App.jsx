@@ -34,6 +34,7 @@ function App() {
   const gameRef = useRef(createGame(STARTING_FEN))
   const clockRef = useRef(null)
   const engineColorRef = useRef('b')
+  const resignedColorRef = useRef(null)
 
   const [humanColor, setHumanColor] = useState('w')
   const [presetId, setPresetId] = useState('rapid-10-0')
@@ -56,9 +57,11 @@ function App() {
   const [depth, setDepth] = useState(null)
   const [uciLines, setUciLines] = useState([])
   const [flaggedColor, setFlaggedColor] = useState(null)
+  const [resignedColor, setResignedColor] = useState(null)
 
   const engineColor = humanColor === 'w' ? 'b' : 'w'
   engineColorRef.current = engineColor
+  resignedColorRef.current = resignedColor
 
   const clockConfig = useMemo(
     () => createClockConfig({ presetId, humanColor, human: customTime.human, engine: customTime.engine }),
@@ -121,7 +124,7 @@ function App() {
 
   useEffect(() => {
     const id = window.setInterval(() => {
-      if (!clockRef.current?.running || flaggedColor) return
+      if (!clockRef.current?.running || flaggedColor || resignedColor) return
       const nextClock = syncClock(tickClock(clockRef.current))
       const flag = flagStatus(nextClock)
       if (flag.flagged) {
@@ -132,7 +135,7 @@ function App() {
     }, 200)
 
     return () => window.clearInterval(id)
-  }, [flaggedColor])
+  }, [flaggedColor, resignedColor])
 
   async function prepareEngine() {
     setEngineError('')
@@ -143,7 +146,7 @@ function App() {
   }
 
   function requestEngineMove(nextGame = gameRef.current, baseClock = clockRef.current) {
-    if (nextGame.isGameOver() || flaggedColor) return
+    if (nextGame.isGameOver() || flaggedColor || resignedColorRef.current) return
 
     const startedClock = syncClock(startClock({ ...baseClock, activeColor: engineColorRef.current }))
     setEngineThinking(true)
@@ -178,6 +181,7 @@ function App() {
     syncClock(nextClock)
     setGameStarted(true)
     setFlaggedColor(null)
+    setResignedColor(null)
     setLastMove(null)
     setThinkingMove(null)
     setSelectedSquare(null)
@@ -202,6 +206,7 @@ function App() {
     syncClock(createClockState({ ...clockConfig, activeColor: 'w' }))
     setGameStarted(false)
     setFlaggedColor(null)
+    setResignedColor(null)
     setEngineThinking(false)
     setLastMove(null)
     setThinkingMove(null)
@@ -211,7 +216,7 @@ function App() {
   }
 
   function applyHumanMove(from, to) {
-    if (!gameStarted || engineThinking || game.turn() !== humanColor || flaggedColor) return false
+    if (!gameStarted || engineThinking || game.turn() !== humanColor || flaggedColor || resignedColor) return false
     const nextGame = createGame(game.fen())
     const move = nextGame.move({ from, to, promotion: 'q' })
     if (!move) return false
@@ -229,6 +234,7 @@ function App() {
   }
 
   function applyEngineMove(move) {
+    if (resignedColorRef.current) return
     const nextGame = createGame(gameRef.current.fen())
     const played = applyUciMove(nextGame, move)
     setEngineThinking(false)
@@ -250,6 +256,16 @@ function App() {
     setEngineStatus('Stopped')
   }
 
+  function resignGame() {
+    adapterRef.current?.stop()
+    setResignedColor(humanColor)
+    resignedColorRef.current = humanColor
+    setEngineThinking(false)
+    setThinkingMove(null)
+    syncClock({ ...clockRef.current, running: false, lastTickAt: null })
+    setEngineStatus(`${humanColor === 'w' ? 'White' : 'Black'} resigned`)
+  }
+
   function toggleRemovedPiece(square) {
     if (removedPieces.includes(square)) {
       setRemovedPieces((current) => current.filter((item) => item !== square))
@@ -262,7 +278,7 @@ function App() {
   }
 
   function onSquareClick(square) {
-    if (!gameStarted || engineThinking || game.turn() !== humanColor) return
+    if (!gameStarted || engineThinking || game.turn() !== humanColor || resignedColor) return
 
     if (selectedSquare && legalMoveSquares.includes(square)) {
       applyHumanMove(selectedSquare, square)
@@ -280,7 +296,10 @@ function App() {
   }
 
   const checkSquare = game.isCheck() ? locateKing(game, game.turn()) : null
-  const status = gameStatus(game, flaggedColor)
+  const status = resignedColor
+    ? `${resignedColor === 'w' ? 'White' : 'Black'} resigned`
+    : gameStatus(game, flaggedColor)
+  const gameActive = gameStarted && !flaggedColor && !resignedColor && !game.isGameOver()
 
   return (
     <main className="app-shell">
@@ -318,6 +337,14 @@ function App() {
             validation={setupValidation}
             disabled={gameStarted}
           />
+          {gameActive && (
+            <section className="panel resign-panel">
+              <h2>Game</h2>
+              <button className="resign-button" type="button" onClick={resignGame}>
+                Resign
+              </button>
+            </section>
+          )}
         </aside>
 
         <section className="board-area">
@@ -362,6 +389,7 @@ function App() {
             </>
           ) : (
             <>
+              <ClockPanel clock={clock} humanColor={humanColor} engineThinking={engineThinking} />
               <section className="panel">
                 <h2>Display</h2>
                 <label className="inline-toggle eval-toggle">

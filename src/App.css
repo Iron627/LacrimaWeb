@@ -307,6 +307,22 @@ select {
   background: #385b78;
 }
 
+.resign-panel {
+  gap: 6px;
+}
+
+.resign-button {
+  min-height: 38px;
+  border-color: #7d453e;
+  background: #3d2523;
+  color: #f1c6bf;
+}
+
+.resign-button:hover:not(:disabled) {
+  border-color: #b86f63;
+  background: #54302c;
+}
+
 .clock-row {
   display: flex;
   justify-content: space-between;
