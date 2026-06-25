@@ -1,11 +1,11 @@
 import { BoardView } from './BoardView'
-import { Bot, Castle, CircleSlash, Crown, MousePointer2, ShieldMinus, User } from 'lucide-react'
+import { Bot, Crown, MousePointer2, User } from 'lucide-react'
 
 const ODDS_TYPES = [
-  { id: 'none', label: 'No odds', Icon: CircleSlash },
-  { id: 'rook', label: 'Rook', Icon: Castle },
-  { id: 'knight', label: 'Knight', Icon: ShieldMinus },
-  { id: 'custom', label: 'Custom', Icon: MousePointer2 },
+  { id: 'none', label: 'None', piece: '•' },
+  { id: 'rook', label: 'Rook', piece: '♜' },
+  { id: 'knight', label: 'Knight', piece: '♞' },
+  { id: 'custom', label: 'Pick', Icon: MousePointer2 },
 ]
 
 export function OddsPanel({
@@ -28,7 +28,7 @@ export function OddsPanel({
     <section className="panel">
       <h2>Material Odds</h2>
       <div className="choice-grid odds-choices">
-        {ODDS_TYPES.map(({ id, label, Icon }) => (
+        {ODDS_TYPES.map(({ id, label, Icon, piece }) => (
           <button
             type="button"
             className={`choice-card ${odds.oddsType === id ? 'selected' : ''}`}
@@ -36,7 +36,7 @@ export function OddsPanel({
             key={id}
             onClick={() => update('oddsType', id)}
           >
-            <Icon size={16} />
+            {Icon ? <Icon size={16} /> : <span className="piece-icon">{piece}</span>}
             <span>{label}</span>
           </button>
         ))}
@@ -53,7 +53,7 @@ export function OddsPanel({
                 onClick={() => update('oddsGiver', 'engine')}
               >
                 <Bot size={15} />
-                <span>Lacrima gives</span>
+                <span>Engine</span>
               </button>
               <button
                 type="button"
@@ -62,7 +62,7 @@ export function OddsPanel({
                 onClick={() => update('oddsGiver', 'human')}
               >
                 <User size={15} />
-                <span>Human gives</span>
+                <span>Human</span>
               </button>
             </div>
           )}
@@ -75,7 +75,7 @@ export function OddsPanel({
                 onClick={() => update('side', 'queen')}
               >
                 <Crown size={15} />
-                <span>Queen-side</span>
+                <span>Queen</span>
               </button>
               <button
                 type="button"
@@ -83,8 +83,8 @@ export function OddsPanel({
                 disabled={disabled}
                 onClick={() => update('side', 'king')}
               >
-                <Castle size={15} />
-                <span>King-side</span>
+                <span className="piece-icon">♚</span>
+                <span>King</span>
               </button>
             </div>
           )}

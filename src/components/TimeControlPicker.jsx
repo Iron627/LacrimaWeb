@@ -1,11 +1,18 @@
 import { TIME_CONTROL_PRESETS } from '../clocks/timeControls'
-import { Badge, Bot, Clock3, Rabbit, Timer, User } from 'lucide-react'
+import { Circle, Clock3, SlidersHorizontal, Timer, Zap } from 'lucide-react'
 
 const PRESET_ICONS = {
-  'rapid-10-0': Clock3,
-  'blitz-3-2': Rabbit,
-  'bullet-1-0': Timer,
-  'custom-imbalanced': Badge,
+  'rapid-10-0': Timer,
+  'blitz-3-2': Zap,
+  'bullet-1-0': Circle,
+  'custom-imbalanced': SlidersHorizontal,
+}
+
+const PRESET_LABELS = {
+  'rapid-10-0': 'Rapid',
+  'blitz-3-2': '3+2',
+  'bullet-1-0': 'Bullet',
+  'custom-imbalanced': 'Odds',
 }
 
 export function TimeControlPicker({
@@ -27,6 +34,7 @@ export function TimeControlPicker({
   }
 
   return (
+    <>
     <section className="panel">
       <h2>Time</h2>
       <div className="choice-grid time-choices">
@@ -37,38 +45,44 @@ export function TimeControlPicker({
               type="button"
               className={`choice-card ${preset.id === presetId ? 'selected' : ''}`}
             disabled={disabled}
-            key={preset.id}
-            onClick={() => setPresetId(preset.id)}
-          >
+              key={preset.id}
+              onClick={() => setPresetId(preset.id)}
+            >
               <Icon size={16} />
-              <span>{preset.label}</span>
+              <span>{PRESET_LABELS[preset.id] || preset.label}</span>
             </button>
           )
         })}
       </div>
+    </section>
 
+    <section className="panel">
+      <h2>Play As</h2>
       <div className="choice-pair" aria-label="Human color">
         <button
           type="button"
-          className={`choice-card ${humanColor === 'w' ? 'selected' : ''}`}
+          className={`choice-card king-card ${humanColor === 'w' ? 'selected' : ''}`}
           disabled={disabled}
           onClick={() => setHumanColor('w')}
         >
-          <User size={16} />
-          <span>Human White</span>
+          <span className="piece-icon white-king">♔</span>
+          <span>White</span>
         </button>
         <button
           type="button"
-          className={`choice-card ${humanColor === 'b' ? 'selected' : ''}`}
+          className={`choice-card king-card ${humanColor === 'b' ? 'selected' : ''}`}
           disabled={disabled}
           onClick={() => setHumanColor('b')}
         >
-          <Bot size={16} />
-          <span>Human Black</span>
+          <span className="piece-icon black-king">♚</span>
+          <span>Black</span>
         </button>
       </div>
+    </section>
 
       {isCustom && (
+        <section className="panel">
+          <h2>Time Odds</h2>
         <div className="time-grid">
           <label>
             Human minutes
@@ -113,7 +127,8 @@ export function TimeControlPicker({
             />
           </label>
         </div>
+        </section>
       )}
-    </section>
+    </>
   )
 }

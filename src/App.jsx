@@ -9,9 +9,9 @@ import { MoveList } from './components/MoveList'
 import { OddsPanel } from './components/OddsPanel'
 import { TimeControlPicker } from './components/TimeControlPicker'
 import { UciConsole } from './components/UciConsole'
-import { addIncrement, createClockState, flagStatus, startClock, stopClockForMove, tickClock } from './clocks/clockController'
+import { createClockState, flagStatus, startClock, stopClockForMove, tickClock } from './clocks/clockController'
 import { createClockConfig } from './clocks/timeControls'
-import { applyUciMove, createGame, gameStatus, legalTargets, moveToUci } from './chess/gameController'
+import { applyUciMove, createGame, gameStatus, legalTargets } from './chess/gameController'
 import { STARTING_FEN, removePieceFromFen } from './chess/fenUtils'
 import { createOddsFen, validateOddsFen } from './chess/odds'
 import { LacrimaAdapter } from './engines/lacrimaAdapter'
@@ -291,9 +291,6 @@ function App() {
         </div>
         <div className="actions">
           <span>{gameStarted ? 'Game active' : 'Setup'}</span>
-          <button type="button" onClick={startGame} disabled={gameStarted || !setupValidation.valid}>
-            Start
-          </button>
           <button type="button" onClick={resetGame}>
             New
           </button>
@@ -324,7 +321,7 @@ function App() {
         </aside>
 
         <section className="board-area">
-          <div className="board-with-eval">
+          <div className={`board-with-eval ${showEvalBar ? '' : 'no-eval'}`}>
             <BoardView
               allowDragging={gameStarted && !engineThinking && game.turn() === humanColor}
               fen={game.fen()}
@@ -338,7 +335,6 @@ function App() {
             />
             <EvalBar
               show={showEvalBar}
-              setShow={setShowEvalBar}
               cpWhite={evalState.cpWhite}
               mateWhite={evalState.mateWhite}
             />
@@ -346,17 +342,45 @@ function App() {
         </section>
 
         <aside className="sidebar right">
-          <ClockPanel clock={clock} humanColor={humanColor} engineThinking={engineThinking} />
-          <EngineStatus
-            status={engineStatus}
-            depth={depth}
-            nps={nps}
-            error={engineError}
-            onStop={stopEngine}
-            canStop={engineThinking}
-          />
-          <MoveList moves={game.history()} />
-          <UciConsole lines={uciLines} />
+          {!gameStarted ? (
+            <>
+              <ClockPanel clock={clock} humanColor={humanColor} engineThinking={engineThinking} />
+              <section className="panel launch-panel">
+                <h2>Ready</h2>
+                <button className="launch-button" type="button" onClick={startGame} disabled={!setupValidation.valid}>
+                  Begin Game
+                </button>
+                {!setupValidation.valid && <p className="warning">{setupValidation.reason}</p>}
+              </section>
+              <section className="panel">
+                <h2>Display</h2>
+                <label className="inline-toggle eval-toggle">
+                  <input checked={showEvalBar} type="checkbox" onChange={(event) => setShowEvalBar(event.target.checked)} />
+                  Show eval bar
+                </label>
+              </section>
+            </>
+          ) : (
+            <>
+              <section className="panel">
+                <h2>Display</h2>
+                <label className="inline-toggle eval-toggle">
+                  <input checked={showEvalBar} type="checkbox" onChange={(event) => setShowEvalBar(event.target.checked)} />
+                  Show eval bar
+                </label>
+              </section>
+              <EngineStatus
+                status={engineStatus}
+                depth={depth}
+                nps={nps}
+                error={engineError}
+                onStop={stopEngine}
+                canStop={engineThinking}
+              />
+              <MoveList moves={game.history()} />
+              <UciConsole lines={uciLines} />
+            </>
+          )}
         </aside>
       </section>
     </main>
