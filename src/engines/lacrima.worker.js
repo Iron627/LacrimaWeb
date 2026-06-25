@@ -12,49 +12,61 @@ let loaded = false
 let loading = null
 let searchStartedAt = null
 let currentSearchSideToMove = 'w'
+let lastInfoPostAt = 0
 
 function post(message) {
   self.postMessage(message)
 }
 
+function postInfo(line, force = false) {
+  const now = performance.now()
+  if (!force && now - lastInfoPostAt < 150) return
+  lastInfoPostAt = now
+
+  const info = parseInfo(line)
+  post({ type: 'line', line })
+  post({ type: 'info', info })
+
+  const move = extractFirstPvMove(line)
+  if (move) post({ type: 'thinkingMove', move })
+
+  const normalized = normalizeScoreToWhite({
+    scoreCp: info.scoreCp,
+    mate: info.mate,
+    sideToMove: currentSearchSideToMove,
+  })
+
+  if (normalized.cpWhite != null || normalized.mateWhite != null) {
+    post({
+      type: 'eval',
+      ...normalized,
+      display: formatEval(normalized),
+    })
+  }
+
+  const nps = deriveNps({
+    nodes: info.nodes,
+    timeMs: info.timeMs,
+    searchStartedAt,
+  })
+  if (nps != null) post({ type: 'nps', nps })
+}
+
 function handleLine(line) {
+  if (line.startsWith('info ')) {
+    postInfo(line)
+    return
+  }
+
   post({ type: 'line', line })
 
   if (line === 'uciok') post({ type: 'uciok' })
   if (line === 'readyok') post({ type: 'readyok' })
 
-  if (line.startsWith('info ')) {
-    const info = parseInfo(line)
-    post({ type: 'info', info })
-
-    const move = extractFirstPvMove(line)
-    if (move) post({ type: 'thinkingMove', move })
-
-    const normalized = normalizeScoreToWhite({
-      scoreCp: info.scoreCp,
-      mate: info.mate,
-      sideToMove: currentSearchSideToMove,
-    })
-
-    if (normalized.cpWhite != null || normalized.mateWhite != null) {
-      post({
-        type: 'eval',
-        ...normalized,
-        display: formatEval(normalized),
-      })
-    }
-
-    const nps = deriveNps({
-      nodes: info.nodes,
-      timeMs: info.timeMs,
-      searchStartedAt,
-    })
-    if (nps != null) post({ type: 'nps', nps })
-  }
-
   const move = parseBestMove(line)
   if (move) {
     searchStartedAt = null
+    lastInfoPostAt = 0
     post({ type: 'bestmove', move, raw: line })
   }
 }
@@ -108,6 +120,8 @@ self.addEventListener('message', async (event) => {
 
     if (message.type === 'command') {
       if (message.command.startsWith('go ')) {
+        // Lacrima stays in a Go WASM Web Worker. Browser WASM can be slower than native,
+        // and the perf panel intentionally measures worker/message overhead too.
         searchStartedAt = performance.now()
         currentSearchSideToMove = message.sideToMove || currentSearchSideToMove
       }

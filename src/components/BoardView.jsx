@@ -15,13 +15,15 @@ export function BoardView({
   lastMove,
   selectedSquare,
   thinkingMove,
-  premove,
+  premoves = [],
   legalTargets = [],
   checkSquare,
   allowDragging = true,
   premoveMode = false,
+  onRightClick,
 }) {
   const pointerStartSquare = useRef(null)
+  const pointerDropRef = useRef(null)
   const squareStyles = {}
 
   function squareFromPointer(event) {
@@ -44,16 +46,31 @@ export function BoardView({
     const sourceSquare = pointerStartSquare.current
     const targetSquare = squareFromPointer(event)
     pointerStartSquare.current = null
+    pointerDropRef.current = { from: sourceSquare, to: targetSquare, at: Date.now() }
     onDrop?.(sourceSquare, targetSquare)
+  }
+
+  function handleContextMenu(event) {
+    event.preventDefault()
+    pointerStartSquare.current = null
+    onRightClick?.()
   }
 
   mark(squareStyles, lastMove?.from, { background: 'rgba(205, 170, 74, 0.62)' })
   mark(squareStyles, lastMove?.to, { background: 'rgba(205, 170, 74, 0.62)' })
   mark(squareStyles, selectedSquare, { boxShadow: 'inset 0 0 0 4px rgba(255, 255, 255, 0.55)' })
-  mark(squareStyles, thinkingMove?.from, { boxShadow: 'inset 0 0 0 4px rgba(112, 161, 255, 0.9)' })
-  mark(squareStyles, thinkingMove?.to, { boxShadow: 'inset 0 0 0 4px rgba(112, 161, 255, 0.9)' })
-  mark(squareStyles, premove?.from, { boxShadow: 'inset 0 0 0 4px rgba(198, 132, 255, 0.9)' })
-  mark(squareStyles, premove?.to, { boxShadow: 'inset 0 0 0 4px rgba(198, 132, 255, 0.9)' })
+  mark(squareStyles, thinkingMove?.from, { boxShadow: 'inset 0 0 0 4px rgba(80, 156, 255, 0.94)' })
+  mark(squareStyles, thinkingMove?.to, { boxShadow: 'inset 0 0 0 4px rgba(80, 156, 255, 0.94)' })
+  premoves.forEach((premove, index) => {
+    const opacity = Math.max(0.45, 0.95 - index * 0.12)
+    mark(squareStyles, premove.from, {
+      boxShadow: `inset 0 0 0 4px rgba(198, 132, 255, ${opacity})`,
+    })
+    mark(squareStyles, premove.to, {
+      boxShadow: `inset 0 0 0 4px rgba(198, 132, 255, ${opacity})`,
+      background: `linear-gradient(135deg, rgba(198, 132, 255, ${opacity * 0.28}), transparent)`,
+    })
+  })
   mark(squareStyles, checkSquare, { background: 'rgba(199, 77, 62, 0.68)' })
 
   for (const square of legalTargets) {
@@ -70,6 +87,7 @@ export function BoardView({
       onPointerUpCapture={onPointerUpCapture}
       onMouseDownCapture={onPointerDownCapture}
       onMouseUpCapture={onPointerUpCapture}
+      onContextMenu={handleContextMenu}
     >
       <Chessboard
         options={{
@@ -81,6 +99,15 @@ export function BoardView({
           animationDurationInMs: 120,
           onPieceDrop: ({ sourceSquare, targetSquare }) => {
             if (!targetSquare) return false
+            const pointerDrop = pointerDropRef.current
+            if (
+              premoveMode &&
+              pointerDrop?.from === sourceSquare &&
+              pointerDrop?.to === targetSquare &&
+              Date.now() - pointerDrop.at < 400
+            ) {
+              return true
+            }
             return onDrop?.(sourceSquare, targetSquare) || false
           },
           onPieceClick: ({ square }) => square && onSquareClick?.(square),

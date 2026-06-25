@@ -218,6 +218,10 @@ select {
 }
 
 .board-area {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
   min-width: 0;
 }
 
@@ -358,11 +362,24 @@ select {
   font-weight: 650;
 }
 
+.runtime-mode {
+  max-width: 130px;
+  overflow: hidden;
+  color: #8f887f !important;
+  font-size: 11px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 dl {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 6px;
   margin: 0;
+}
+
+.perf-grid {
+  grid-template-columns: 1fr 1fr;
 }
 
 dt {
@@ -414,6 +431,64 @@ dd {
 
 .move-list li:nth-child(odd) {
   background: #1f1d1a;
+}
+
+.latest-move {
+  color: #f0d9b5;
+  background: rgba(126, 165, 200, 0.18);
+  border-radius: 2px;
+  padding: 0 3px;
+}
+
+.uci-command {
+  display: grid;
+  gap: 4px;
+}
+
+.uci-command span {
+  color: #7f786f;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.uci-command code,
+.fen-panel code {
+  overflow: hidden;
+  color: #cbd5e1;
+  font-size: 11px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.fen-panel {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+  width: min(100%, calc(100vh - 78px));
+  padding: 7px 8px;
+  border: 1px solid #343434;
+  border-radius: 4px;
+  background: #202020;
+  box-sizing: border-box;
+}
+
+.fen-panel button {
+  min-height: 26px;
+  padding: 0 8px;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.endgame-panel {
+  gap: 10px;
+}
+
+.pgn-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
 }
 
 .uci-console pre {

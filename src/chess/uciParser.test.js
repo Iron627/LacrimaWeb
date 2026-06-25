@@ -56,6 +56,9 @@ describe('uciParser', () => {
     expect(formatEval({ cpWhite: -115, mateWhite: null })).toBe('-1.15')
     expect(formatEval({ cpWhite: null, mateWhite: 3 })).toBe('M3')
     expect(formatEval({ cpWhite: null, mateWhite: -2 })).toBe('-M2')
+    expect(formatEval({ cpWhite: 999, mateWhite: null })).toBe('M1')
+    expect(formatEval({ cpWhite: 998, mateWhite: null })).toBe('M2')
+    expect(formatEval({ cpWhite: -999, mateWhite: null })).toBe('-M1')
   })
 
   it('derives nps from UCI time first and wall-clock time second', () => {

@@ -56,12 +56,24 @@ export function cpToEvalPercent(cp) {
   return 50 + (clamped / 800) * 50
 }
 
+function cpMateLikeDistance(cp) {
+  const absolute = Math.abs(cp)
+  if (absolute < 998) return null
+  return Math.max(1, 1000 - absolute)
+}
+
 export function formatEval({ cpWhite, mateWhite }) {
   if (mateWhite != null) {
     return mateWhite < 0 ? `-M${Math.abs(mateWhite)}` : `M${mateWhite}`
   }
 
-  if (cpWhite == null) return '—'
+  if (cpWhite == null) return '-'
+
+  const mateLikeDistance = cpMateLikeDistance(cpWhite)
+  if (mateLikeDistance != null) {
+    return cpWhite < 0 ? `-M${mateLikeDistance}` : `M${mateLikeDistance}`
+  }
+
   const pawns = cpWhite / 100
   return `${pawns >= 0 ? '+' : ''}${pawns.toFixed(2)}`
 }
@@ -79,7 +91,7 @@ export function deriveNps({ nodes, timeMs, searchStartedAt }) {
 }
 
 export function formatNps(nps) {
-  if (!nps) return '—'
+  if (!nps) return '-'
   if (nps >= 1_000_000) return `${(nps / 1_000_000).toFixed(nps >= 10_000_000 ? 0 : 1)}M nps`
   if (nps >= 1000) return `${Math.round(nps / 1000)}k nps`
   return `${nps} nps`
