@@ -1,8 +1,18 @@
 import { describe, expect, it } from 'vitest'
 import { Chess } from 'chess.js'
 import { createOddsFen, removePieceFromFen, validateOddsFen } from './odds'
+import { STARTING_FEN } from './fenUtils'
 
 describe('odds', () => {
+  it('returns the standard starting FEN for no odds', () => {
+    expect(createOddsFen({
+      humanColor: 'w',
+      oddsType: 'none',
+      oddsGiver: 'engine',
+      removedPieces: [],
+    })).toBe(STARTING_FEN)
+  })
+
   it('removes a queen-side rook from the engine side and updates castling rights', () => {
     const fen = createOddsFen({
       humanColor: 'w',
@@ -60,7 +70,7 @@ describe('odds', () => {
   })
 
   it('can remove a piece from an arbitrary FEN square', () => {
-    const fen = removePieceFromFen(Chess.DEFAULT_POSITION, 'a1')
+    const fen = removePieceFromFen(STARTING_FEN, 'a1')
     expect(new Chess(fen).get('a1')).toBeUndefined()
     expect(fen.split(' ')[2]).toBe('Kkq')
   })

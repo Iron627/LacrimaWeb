@@ -1,6 +1,6 @@
 import { Chess } from 'chess.js'
 
-export const STARTING_FEN = Chess.DEFAULT_POSITION
+export const STARTING_FEN = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'
 
 export function squareColor(square) {
   return square.endsWith('1') || square.endsWith('2') ? 'w' : 'b'
