@@ -1,4 +1,12 @@
 import { BoardView } from './BoardView'
+import { Bot, Castle, CircleSlash, Crown, MousePointer2, ShieldMinus, User } from 'lucide-react'
+
+const ODDS_TYPES = [
+  { id: 'none', label: 'No odds', Icon: CircleSlash },
+  { id: 'rook', label: 'Rook', Icon: Castle },
+  { id: 'knight', label: 'Knight', Icon: ShieldMinus },
+  { id: 'custom', label: 'Custom', Icon: MousePointer2 },
+]
 
 export function OddsPanel({
   odds,
@@ -19,35 +27,66 @@ export function OddsPanel({
   return (
     <section className="panel">
       <h2>Material Odds</h2>
-      <label>
-        Odds type
-        <select disabled={disabled} value={odds.oddsType} onChange={(event) => update('oddsType', event.target.value)}>
-          <option value="none">No odds</option>
-          <option value="rook">Rook odds</option>
-          <option value="knight">Knight odds</option>
-          <option value="custom">Custom remove pieces</option>
-        </select>
-      </label>
+      <div className="choice-grid odds-choices">
+        {ODDS_TYPES.map(({ id, label, Icon }) => (
+          <button
+            type="button"
+            className={`choice-card ${odds.oddsType === id ? 'selected' : ''}`}
+            disabled={disabled}
+            key={id}
+            onClick={() => update('oddsType', id)}
+          >
+            <Icon size={16} />
+            <span>{label}</span>
+          </button>
+        ))}
+      </div>
 
       {odds.oddsType !== 'none' && (
-        <div className="time-grid">
+        <div className="odds-subgrid">
           {odds.oddsType !== 'custom' && (
-            <label>
-              Giver
-              <select disabled={disabled} value={odds.oddsGiver} onChange={(event) => update('oddsGiver', event.target.value)}>
-                <option value="engine">Lacrima gives odds</option>
-                <option value="human">Human gives odds</option>
-              </select>
-            </label>
+            <div className="choice-pair compact" aria-label="Odds giver">
+              <button
+                type="button"
+                className={`choice-card ${odds.oddsGiver === 'engine' ? 'selected' : ''}`}
+                disabled={disabled}
+                onClick={() => update('oddsGiver', 'engine')}
+              >
+                <Bot size={15} />
+                <span>Lacrima gives</span>
+              </button>
+              <button
+                type="button"
+                className={`choice-card ${odds.oddsGiver === 'human' ? 'selected' : ''}`}
+                disabled={disabled}
+                onClick={() => update('oddsGiver', 'human')}
+              >
+                <User size={15} />
+                <span>Human gives</span>
+              </button>
+            </div>
           )}
           {odds.oddsType !== 'custom' && (
-            <label>
-              Side
-              <select disabled={disabled} value={odds.side} onChange={(event) => update('side', event.target.value)}>
-                <option value="queen">Queen-side</option>
-                <option value="king">King-side</option>
-              </select>
-            </label>
+            <div className="choice-pair compact" aria-label="Odds side">
+              <button
+                type="button"
+                className={`choice-card ${odds.side === 'queen' ? 'selected' : ''}`}
+                disabled={disabled}
+                onClick={() => update('side', 'queen')}
+              >
+                <Crown size={15} />
+                <span>Queen-side</span>
+              </button>
+              <button
+                type="button"
+                className={`choice-card ${odds.side === 'king' ? 'selected' : ''}`}
+                disabled={disabled}
+                onClick={() => update('side', 'king')}
+              >
+                <Castle size={15} />
+                <span>King-side</span>
+              </button>
+            </div>
           )}
         </div>
       )}

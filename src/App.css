@@ -1,9 +1,7 @@
 .app-shell {
   min-height: 100vh;
   color: #d8d4cc;
-  background:
-    radial-gradient(circle at 50% 0%, rgba(118, 150, 86, 0.12), transparent 34rem),
-    #161512;
+  background: #161616;
 }
 
 .top-bar {
@@ -67,9 +65,10 @@ button {
 }
 
 button:hover:not(:disabled),
-.segmented button.selected {
-  border-color: #8fb56b;
-  background: #3a4a2d;
+.segmented button.selected,
+.choice-card.selected {
+  border-color: #6c8fb2;
+  background: #263747;
   color: #f4ecd7;
 }
 
@@ -100,9 +99,9 @@ input:disabled {
   flex-direction: column;
   gap: 8px;
   padding: 10px;
-  border: 1px solid #34312c;
+  border: 1px solid #343434;
   border-radius: 4px;
-  background: #24221f;
+  background: #242424;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.025);
 }
 
@@ -128,6 +127,52 @@ select {
   padding: 0 8px;
 }
 
+.choice-grid,
+.choice-pair {
+  display: grid;
+  gap: 6px;
+}
+
+.choice-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.choice-pair {
+  grid-template-columns: 1fr 1fr;
+}
+
+.choice-card {
+  display: grid;
+  grid-template-columns: 18px minmax(0, 1fr);
+  align-items: center;
+  gap: 6px;
+  min-height: 36px;
+  padding: 6px 8px;
+  text-align: left;
+  color: #bdb6ab;
+  background: #1b1b1b;
+}
+
+.choice-card svg {
+  color: #958e84;
+}
+
+.choice-card span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.choice-card.selected svg {
+  color: #9fc4e5;
+}
+
+.choice-pair.compact .choice-card,
+.odds-subgrid .choice-card {
+  min-height: 32px;
+  font-size: 11px;
+}
+
 .segmented {
   flex-wrap: wrap;
 }
@@ -139,10 +184,15 @@ select {
 }
 
 .time-grid,
-.engine-grid {
+.engine-grid,
+.odds-subgrid {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 7px;
+}
+
+.odds-subgrid {
+  grid-template-columns: 1fr;
 }
 
 .board-area {
@@ -218,8 +268,8 @@ select {
 }
 
 .clock-row.active {
-  background: #3d4f2e;
-  outline: 1px solid #8fb56b;
+  background: #243444;
+  outline: 1px solid #6c8fb2;
 }
 
 .clock-row span {

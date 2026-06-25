@@ -1,4 +1,12 @@
 import { TIME_CONTROL_PRESETS } from '../clocks/timeControls'
+import { Badge, Bot, Clock3, Rabbit, Timer, User } from 'lucide-react'
+
+const PRESET_ICONS = {
+  'rapid-10-0': Clock3,
+  'blitz-3-2': Rabbit,
+  'bullet-1-0': Timer,
+  'custom-imbalanced': Badge,
+}
 
 export function TimeControlPicker({
   presetId,
@@ -21,27 +29,44 @@ export function TimeControlPicker({
   return (
     <section className="panel">
       <h2>Time</h2>
-      <div className="segmented">
-        {TIME_CONTROL_PRESETS.map((preset) => (
-          <button
-            type="button"
-            className={preset.id === presetId ? 'selected' : ''}
+      <div className="choice-grid time-choices">
+        {TIME_CONTROL_PRESETS.map((preset) => {
+          const Icon = PRESET_ICONS[preset.id] || Clock3
+          return (
+            <button
+              type="button"
+              className={`choice-card ${preset.id === presetId ? 'selected' : ''}`}
             disabled={disabled}
             key={preset.id}
             onClick={() => setPresetId(preset.id)}
           >
-            {preset.label}
-          </button>
-        ))}
+              <Icon size={16} />
+              <span>{preset.label}</span>
+            </button>
+          )
+        })}
       </div>
 
-      <label>
-        Human color
-        <select disabled={disabled} value={humanColor} onChange={(event) => setHumanColor(event.target.value)}>
-          <option value="w">White</option>
-          <option value="b">Black</option>
-        </select>
-      </label>
+      <div className="choice-pair" aria-label="Human color">
+        <button
+          type="button"
+          className={`choice-card ${humanColor === 'w' ? 'selected' : ''}`}
+          disabled={disabled}
+          onClick={() => setHumanColor('w')}
+        >
+          <User size={16} />
+          <span>Human White</span>
+        </button>
+        <button
+          type="button"
+          className={`choice-card ${humanColor === 'b' ? 'selected' : ''}`}
+          disabled={disabled}
+          onClick={() => setHumanColor('b')}
+        >
+          <Bot size={16} />
+          <span>Human Black</span>
+        </button>
+      </div>
 
       {isCustom && (
         <div className="time-grid">

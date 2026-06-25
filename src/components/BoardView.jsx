@@ -47,8 +47,8 @@ export function BoardView({
             return onDrop?.(sourceSquare, targetSquare) || false
           },
           onSquareClick: ({ square }) => onSquareClick?.(square),
-          darkSquareStyle: { backgroundColor: '#769656' },
-          lightSquareStyle: { backgroundColor: '#baca44' },
+          darkSquareStyle: { backgroundColor: '#b58863' },
+          lightSquareStyle: { backgroundColor: '#f0d9b5' },
           boardStyle: {
             borderRadius: 3,
             boxShadow: '0 12px 34px rgba(0, 0, 0, 0.34)',
