@@ -30,6 +30,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22
+          cache: npm
 
       - name: Clone Lacrima
         run: |
@@ -38,7 +39,7 @@ jobs:
           echo "LACRIMA_SHA=$(git rev-parse HEAD)" >> $GITHUB_ENV
 
       - name: Install dependencies
-        run: npm install
+        run: npm ci
 
       - name: Build Lacrima WASM
         run: npm run build:engine
@@ -68,10 +69,12 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          chmod 0644 public/engines/lacrima/lacrima.wasm public/engines/lacrima/wasm_exec.js public/engines/lacrima/build-info.json
           git add public/engines/lacrima
           if git diff --cached --quiet; then
             echo "No Lacrima WASM asset changes."
           else
             git commit -m "chore: update Lacrima WASM"
+            git pull --rebase origin "${GITHUB_REF_NAME}"
             git push
           fi
