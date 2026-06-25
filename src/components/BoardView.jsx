@@ -23,6 +23,7 @@ export function BoardView({
   onRightClick,
 }) {
   const pointerStartSquare = useRef(null)
+  const pointerStartPoint = useRef(null)
   const pointerDropRef = useRef(null)
   const squareStyles = {}
 
@@ -39,13 +40,22 @@ export function BoardView({
   function onPointerDownCapture(event) {
     if (!premoveMode) return
     pointerStartSquare.current = squareFromPointer(event)
+    pointerStartPoint.current = { x: event.clientX, y: event.clientY }
   }
 
   function onPointerUpCapture(event) {
     if (!premoveMode || !pointerStartSquare.current) return
+    const startPoint = pointerStartPoint.current
     const sourceSquare = pointerStartSquare.current
     const targetSquare = squareFromPointer(event)
     pointerStartSquare.current = null
+    pointerStartPoint.current = null
+
+    const movedDistance = startPoint
+      ? Math.hypot(event.clientX - startPoint.x, event.clientY - startPoint.y)
+      : 0
+    if (movedDistance < 8) return
+
     pointerDropRef.current = { from: sourceSquare, to: targetSquare, at: Date.now() }
     onDrop?.(sourceSquare, targetSquare)
   }
@@ -53,6 +63,7 @@ export function BoardView({
   function handleContextMenu(event) {
     event.preventDefault()
     pointerStartSquare.current = null
+    pointerStartPoint.current = null
     onRightClick?.()
   }
 
