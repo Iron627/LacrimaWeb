@@ -34,6 +34,8 @@ function App() {
   const gameRef = useRef(createGame(STARTING_FEN))
   const clockRef = useRef(null)
   const engineColorRef = useRef('b')
+  const humanColorRef = useRef('w')
+  const premoveRef = useRef(null)
   const resignedColorRef = useRef(null)
 
   const [humanColor, setHumanColor] = useState('w')
@@ -49,6 +51,7 @@ function App() {
   const [engineError, setEngineError] = useState('')
   const [lastMove, setLastMove] = useState(null)
   const [thinkingMove, setThinkingMove] = useState(null)
+  const [premove, setPremove] = useState(null)
   const [selectedSquare, setSelectedSquare] = useState(null)
   const [legalMoveSquares, setLegalMoveSquares] = useState([])
   const [evalState, setEvalState] = useState({ cpWhite: null, mateWhite: null })
@@ -60,6 +63,7 @@ function App() {
   const [resignedColor, setResignedColor] = useState(null)
 
   const engineColor = humanColor === 'w' ? 'b' : 'w'
+  humanColorRef.current = humanColor
   engineColorRef.current = engineColor
   resignedColorRef.current = resignedColor
 
@@ -184,6 +188,7 @@ function App() {
     setResignedColor(null)
     setLastMove(null)
     setThinkingMove(null)
+    clearPremove()
     setSelectedSquare(null)
     setLegalMoveSquares([])
     setEvalState({ cpWhite: null, mateWhite: null })
@@ -210,9 +215,30 @@ function App() {
     setEngineThinking(false)
     setLastMove(null)
     setThinkingMove(null)
+    clearPremove()
     setSelectedSquare(null)
     setLegalMoveSquares([])
     setEngineStatus('Idle')
+  }
+
+  function clearPremove() {
+    premoveRef.current = null
+    setPremove(null)
+  }
+
+  function queuePremove(from, to) {
+    const piece = gameRef.current.get(from)
+    if (!piece || piece.color !== humanColorRef.current || from === to) return false
+
+    const nextPremove = { from, to }
+    if (premoveRef.current?.from === from && premoveRef.current?.to === to) return true
+
+    premoveRef.current = nextPremove
+    setPremove(nextPremove)
+    setUciLines((lines) => [...lines.slice(-120), `premove ${from}${to}`])
+    setSelectedSquare(null)
+    setLegalMoveSquares([])
+    return true
   }
 
   function applyHumanMove(from, to) {
@@ -223,6 +249,7 @@ function App() {
 
     syncGame(nextGame)
     setLastMove({ from: move.from, to: move.to })
+    clearPremove()
     setSelectedSquare(null)
     setLegalMoveSquares([])
 
@@ -246,13 +273,57 @@ function App() {
     syncGame(nextGame)
     setLastMove({ from: played.from, to: played.to })
     const stoppedClock = stopClockForMove(clockRef.current, engineColorRef.current)
-    syncClock(nextGame.isGameOver() ? stoppedClock : { ...stoppedClock, activeColor: humanColor })
+    const nextClock = nextGame.isGameOver() ? stoppedClock : { ...stoppedClock, activeColor: humanColorRef.current }
+
+    if (!nextGame.isGameOver() && tryApplyPremove(nextGame, nextClock)) return
+
+    syncClock(nextClock)
+  }
+
+  function tryApplyPremove(baseGame, baseClock) {
+    const queued = premoveRef.current
+    clearPremove()
+    if (!queued) return false
+
+    const nextGame = createGame(baseGame.fen())
+    const piece = nextGame.get(queued.from)
+    if (!piece || piece.color !== humanColorRef.current) {
+      setUciLines((lines) => [...lines.slice(-120), `premove ${queued.from}${queued.to} discarded`])
+      syncClock(baseClock)
+      return false
+    }
+
+    const move = nextGame.move({ from: queued.from, to: queued.to, promotion: 'q' })
+    if (!move) {
+      setUciLines((lines) => [...lines.slice(-120), `premove ${queued.from}${queued.to} illegal`])
+      syncClock(baseClock)
+      return false
+    }
+
+    syncGame(nextGame)
+    setLastMove({ from: move.from, to: move.to })
+
+    const now = performance.now()
+    const premoveClock = stopClockForMove(
+      startClock({ ...baseClock, activeColor: humanColorRef.current }, now),
+      humanColorRef.current,
+      now,
+    )
+
+    if (nextGame.isGameOver()) {
+      syncClock(premoveClock)
+      return true
+    }
+
+    requestEngineMove(nextGame, premoveClock)
+    return true
   }
 
   function stopEngine() {
     adapterRef.current?.stop()
     setEngineThinking(false)
     setThinkingMove(null)
+    clearPremove()
     setEngineStatus('Stopped')
   }
 
@@ -262,6 +333,7 @@ function App() {
     resignedColorRef.current = humanColor
     setEngineThinking(false)
     setThinkingMove(null)
+    clearPremove()
     syncClock({ ...clockRef.current, running: false, lastTickAt: null })
     setEngineStatus(`${humanColor === 'w' ? 'White' : 'Black'} resigned`)
   }
@@ -278,7 +350,25 @@ function App() {
   }
 
   function onSquareClick(square) {
-    if (!gameStarted || engineThinking || game.turn() !== humanColor || resignedColor) return
+    if (!gameStarted || resignedColor) return
+
+    if (engineThinking) {
+      if (selectedSquare && selectedSquare !== square) {
+        queuePremove(selectedSquare, square)
+        return
+      }
+
+      const piece = game.get(square)
+      if (piece?.color === humanColor) {
+        setSelectedSquare(square)
+        setLegalMoveSquares([])
+      } else {
+        setSelectedSquare(null)
+      }
+      return
+    }
+
+    if (game.turn() !== humanColor) return
 
     if (selectedSquare && legalMoveSquares.includes(square)) {
       applyHumanMove(selectedSquare, square)
@@ -310,9 +400,6 @@ function App() {
         </div>
         <div className="actions">
           <span>{gameStarted ? 'Game active' : 'Setup'}</span>
-          <button type="button" onClick={resetGame}>
-            New
-          </button>
         </div>
       </header>
 
@@ -350,14 +437,17 @@ function App() {
         <section className="board-area">
           <div className={`board-with-eval ${showEvalBar ? '' : 'no-eval'}`}>
             <BoardView
-              allowDragging={gameStarted && !engineThinking && game.turn() === humanColor}
+              allowDragging={gameActive && (engineThinking || game.turn() === humanColor)}
               fen={game.fen()}
               orientation={humanColor === 'w' ? 'white' : 'black'}
               lastMove={lastMove}
+              selectedSquare={selectedSquare}
               thinkingMove={thinkingMove}
+              premove={premove}
+              premoveMode={engineThinking}
               legalTargets={legalMoveSquares}
               checkSquare={checkSquare}
-              onDrop={applyHumanMove}
+              onDrop={(from, to) => (engineThinking ? queuePremove(from, to) : applyHumanMove(from, to))}
               onSquareClick={onSquareClick}
             />
             <EvalBar
