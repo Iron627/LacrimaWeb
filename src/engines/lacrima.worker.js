@@ -7,6 +7,7 @@ import {
   parseInfo,
 } from '../chess/uciParser'
 import { LACRIMA_ASSETS } from './lacrimaManifest'
+import { assertGoWasmSupport } from './wasmSupport'
 
 let loaded = false
 let loading = null
@@ -71,12 +72,32 @@ function handleLine(line) {
   }
 }
 
+async function instantiateLacrimaWasm(go) {
+  const response = await fetch(LACRIMA_ASSETS.wasm)
+  if (!response.ok) {
+    throw new Error(`Unable to load ${LACRIMA_ASSETS.wasm}`)
+  }
+
+  if (typeof WebAssembly.instantiateStreaming === 'function') {
+    try {
+      return await WebAssembly.instantiateStreaming(response.clone(), go.importObject)
+    } catch {
+      // Some mobile browsers and webviews fail streaming WASM even when the file is valid.
+      // Byte instantiation keeps Lacrima in the worker while avoiding that browser edge.
+    }
+  }
+
+  const bytes = await response.arrayBuffer()
+  return WebAssembly.instantiate(bytes, go.importObject)
+}
+
 async function loadLacrima() {
   if (loaded) return
   if (loading) return loading
 
   loading = (async () => {
     self.lacrimaOnLine = handleLine
+    assertGoWasmSupport(self)
 
     const wasmExecResponse = await fetch(LACRIMA_ASSETS.wasmExec)
     if (!wasmExecResponse.ok) {
@@ -90,7 +111,7 @@ async function loadLacrima() {
     }
 
     const go = new self.Go()
-    const result = await WebAssembly.instantiateStreaming(fetch(LACRIMA_ASSETS.wasm), go.importObject)
+    const result = await instantiateLacrimaWasm(go)
     go.run(result.instance)
 
     loaded = true
