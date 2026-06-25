@@ -2,7 +2,7 @@
   "id": "lacrima",
   "name": "Lacrima",
   "uci": true,
-  "wasm": "/engines/lacrima/lacrima.wasm",
-  "wasmExec": "/engines/lacrima/wasm_exec.js",
+  "wasm": "engines/lacrima/lacrima.wasm",
+  "wasmExec": "engines/lacrima/wasm_exec.js",
   "source": "https://github.com/iron627/lacrima"
 }
