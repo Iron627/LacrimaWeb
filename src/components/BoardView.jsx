@@ -106,7 +106,7 @@ export function BoardView({
               pointerDrop?.to === targetSquare &&
               Date.now() - pointerDrop.at < 400
             ) {
-              return true
+              return false
             }
             return onDrop?.(sourceSquare, targetSquare) || false
           },

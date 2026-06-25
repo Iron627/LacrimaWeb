@@ -1,6 +1,6 @@
 import { Chess } from 'chess.js'
 import { describe, expect, it } from 'vitest'
-import { isObviouslyPossiblePremove, playNextPremove } from './premoves'
+import { queuePremove, isObviouslyPossiblePremove, playNextPremove } from './premoves'
 
 describe('premoves', () => {
   it('requires a human piece on the source square', () => {
@@ -17,6 +17,20 @@ describe('premoves', () => {
     expect(isObviouslyPossiblePremove(game, { from: 'g1', to: 'g3' }, 'w')).toBe(false)
     expect(isObviouslyPossiblePremove(game, { from: 'e2', to: 'e4' }, 'w')).toBe(true)
     expect(isObviouslyPossiblePremove(game, { from: 'c1', to: 'g5' }, 'w')).toBe(true)
+  })
+
+  it('clears all queued premoves when a new premove attempt is invalid', () => {
+    const game = new Chess()
+
+    const result = queuePremove({
+      game,
+      queue: [{ from: 'g1', to: 'f3' }],
+      premove: { from: 'g1', to: 'g3' },
+      humanColor: 'w',
+    })
+
+    expect(result.accepted).toBe(false)
+    expect(result.queue).toEqual([])
   })
 
   it('executes the next legal premove and preserves remaining queued premoves', () => {

@@ -13,7 +13,7 @@ import { createClockState, flagStatus, startClock, stopClockForMove, tickClock }
 import { createClockConfig } from './clocks/timeControls'
 import { applyUciMove, createGame, gameStatus, legalTargets } from './chess/gameController'
 import { STARTING_FEN, removePieceFromFen } from './chess/fenUtils'
-import { isObviouslyPossiblePremove, playNextPremove } from './chess/premoves'
+import { queuePremove as buildPremoveQueue, playNextPremove } from './chess/premoves'
 import { createOddsFen, validateOddsFen } from './chess/odds'
 import { deriveNps } from './chess/uciParser'
 import { LacrimaAdapter } from './engines/lacrimaAdapter'
@@ -322,13 +322,24 @@ function App() {
 
   function queuePremove(from, to) {
     const nextPremove = { from, to }
-    if (!isObviouslyPossiblePremove(gameRef.current, nextPremove, humanColorRef.current)) return false
-    const lastQueued = premoveQueueRef.current[premoveQueueRef.current.length - 1]
-    if (lastQueued?.from === from && lastQueued?.to === to) return true
+    const previousQueue = premoveQueueRef.current
+    const result = buildPremoveQueue({
+      game: gameRef.current,
+      queue: previousQueue,
+      premove: nextPremove,
+      humanColor: humanColorRef.current,
+    })
 
-    const nextQueue = [...premoveQueueRef.current, nextPremove]
-    premoveQueueRef.current = nextQueue
-    setPremoveQueue(nextQueue)
+    premoveQueueRef.current = result.queue
+    setPremoveQueue(result.queue)
+    restoreBoardPosition()
+    if (!result.accepted) {
+      setSelectedSquare(null)
+      setLegalMoveSquares([])
+      return false
+    }
+
+    if (result.queue === previousQueue) return true
     recordLine(`premove ${from}${to}`)
     setSelectedSquare(null)
     setLegalMoveSquares([])

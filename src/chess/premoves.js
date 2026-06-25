@@ -54,6 +54,19 @@ export function isObviouslyPossiblePremove(game, premove, humanColor) {
   return matchesPieceGeometry(piece, premove.from, premove.to)
 }
 
+export function queuePremove({ game, queue, premove, humanColor }) {
+  if (!isObviouslyPossiblePremove(game, premove, humanColor)) {
+    return { accepted: false, queue: [] }
+  }
+
+  const lastQueued = queue[queue.length - 1]
+  if (lastQueued?.from === premove.from && lastQueued?.to === premove.to) {
+    return { accepted: true, queue }
+  }
+
+  return { accepted: true, queue: [...queue, premove] }
+}
+
 export function playNextPremove(game, queue, humanColor) {
   const [next, ...remaining] = queue
   if (!next) return { game, move: null, remaining }
