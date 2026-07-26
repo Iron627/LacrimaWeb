@@ -1,7 +1,7 @@
 {
   "engine": "lacrima",
   "source": "https://github.com/iron627/lacrima",
-  "commit": "1bcc73ebf1ec3e1611d6c0db7979cccba6ee18b7",
-  "builtAt": "2026-07-25T13:44:12Z",
+  "commit": "b2f59391574be49831fd0368e4029ffa0b14356b",
+  "builtAt": "2026-07-26T03:25:26Z",
   "goVersion": "go version go1.26.5 linux/amd64"
 }
