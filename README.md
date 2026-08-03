@@ -1,7 +1,9 @@
 # LacrimaWeb
 
+# Disclaimer -> this project is 100% gpt authored because i am not a web dev.
+
 LacrimaWeb is a static Vite + React chess GUI for playing against [Lacrima](https://github.com/iron627/lacrima) in the browser. The app is Lacrima-only: there are no Stockfish dependencies, examples, fallbacks, or assumptions.
-this project is 100% gpt authored
+
 ## Features
 
 - Clock-based UCI play with `go wtime ... btime ... winc ... binc ...`.
